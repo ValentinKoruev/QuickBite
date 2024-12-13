@@ -75,6 +75,7 @@ namespace QuickBite.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     RestaurantId = table.Column<int>(type: "int", nullable: false),
+                    CourierId = table.Column<int>(type: "int", nullable: true),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
@@ -87,6 +88,11 @@ namespace QuickBite.Migrations
                         principalTable: "Restaurants",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Orders_Users_CourierId",
+                        column: x => x.CourierId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Orders_Users_UserId",
                         column: x => x.UserId,
@@ -138,7 +144,8 @@ namespace QuickBite.Migrations
                 columns: new[] { "Id", "Address", "Email", "FirstName", "LastName", "Password", "Type", "Username" },
                 values: new object[,]
                 {
-                    { -3, null, "ivanivanov@gmail.com", "Ivan", "Ivanov", "pass123", 4, "ivanov123" },
+                    { -4, null, "ivanivanov@gmail.com", "Ivan", "Ivanov", "pass123", 9999, "ivanov123" },
+                    { -3, null, "takeout@kfc.bg", "KFC", null, "pass123", 3, "kfc" },
                     { -2, null, "petar444@gmail.com", "Petar", "Petrov", "pass123", 2, "petar444" },
                     { -1, null, "valentinkoruev@gmail.com", "Valentin", "Koruev", "pass123", 1, "valentinkoruev5" }
                 });
@@ -168,6 +175,11 @@ namespace QuickBite.Migrations
                 name: "IX_OrderProducts_ProductId",
                 table: "OrderProducts",
                 column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_CourierId",
+                table: "Orders",
+                column: "CourierId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_RestaurantId",

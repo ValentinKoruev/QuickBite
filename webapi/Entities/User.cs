@@ -7,7 +7,8 @@ public class User
     {
         Customer = 1,
         Courier = 2,
-        Administrator = 4
+        Restaurant = 3,
+        Administrator = 9999
     }
 
     [Key]

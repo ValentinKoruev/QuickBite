@@ -56,6 +56,14 @@ public class QuickBiteDbContext : DbContext
             },
             new User() {
                 Id = index--,
+                Username = "kfc",
+                Password = "pass123",
+                Email = "takeout@kfc.bg",
+                FirstName = "KFC",
+                Type = User.UserType.Restaurant
+            },
+            new User() {
+                Id = index--,
                 Username = "ivanov123",
                 Password = "pass123",
                 Email = "ivanivanov@gmail.com",
