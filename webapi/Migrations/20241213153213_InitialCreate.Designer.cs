@@ -12,7 +12,7 @@ using QuickBite.Repositories;
 namespace QuickBite.Migrations
 {
     [DbContext(typeof(QuickBiteDbContext))]
-    [Migration("20241213144344_InitialCreate")]
+    [Migration("20241213153213_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -67,10 +67,6 @@ namespace QuickBite.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");

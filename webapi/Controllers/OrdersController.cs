@@ -95,18 +95,39 @@ public class OrdersController : ControllerBase
 
         if (loggedUser == null) return Unauthorized();
 
+        if (loggedUser.Type == UserType.Customer || loggedUser.Type == UserType.Administrator) return Forbid();
+
         Restaurant restaurant = context.Restaurants
                                   .Where(r => r.Id == model.RestaurantId)
                                   .FirstOrDefault();
 
         if (restaurant == null) return BadRequest();           
 
-        context.Orders.Add(new Order {
+        Order order = new Order {
             UserId = loggedUserId,
             RestaurantId = context.Restaurants.First().Id,
             Address = model.Address,
-            Status = Order.OrderStatus.Pending
-        });
+            Status = OrderStatus.Pending
+        };
+
+        context.Orders.Add(order);
+
+        context.SaveChanges();
+
+        foreach(CreateModel.ProductModel productModel in model.Products) {
+
+            Product product = context.Products
+                                  .Where(p => p.Id == productModel.Id)
+                                  .FirstOrDefault();
+
+            if(product == null) continue; // skip not found items
+
+            context.OrderProducts.Add(new OrderProduct {
+                ProductId = product.Id,
+                OrderId = order.Id,
+                Quantity = (uint)productModel.Quantity
+            });
+        }
         context.SaveChanges();
 
 
