@@ -12,7 +12,7 @@ using QuickBite.Repositories;
 namespace QuickBite.Migrations
 {
     [DbContext(typeof(QuickBiteDbContext))]
-    [Migration("20241213153213_InitialCreate")]
+    [Migration("20241213220416_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -119,104 +119,63 @@ namespace QuickBite.Migrations
                             Id = -1,
                             Name = "Master Burger Pizza",
                             Price = 15m,
-                            RestaurantId = -1
+                            RestaurantId = -3
                         },
                         new
                         {
                             Id = -2,
                             Name = "Chik Chirik Pizza",
                             Price = 12m,
-                            RestaurantId = -1
+                            RestaurantId = -3
                         },
                         new
                         {
                             Id = -3,
                             Name = "Vegetarian Pizza",
                             Price = 8m,
-                            RestaurantId = -1
+                            RestaurantId = -3
                         },
                         new
                         {
                             Id = -4,
                             Name = "Zinger Burger",
                             Price = 10m,
-                            RestaurantId = -2
+                            RestaurantId = -4
                         },
                         new
                         {
                             Id = -5,
                             Name = "Bonburger",
                             Price = 5m,
-                            RestaurantId = -2
+                            RestaurantId = -4
                         },
                         new
                         {
                             Id = -6,
                             Name = "Bucket 30 Hot",
                             Price = 25m,
-                            RestaurantId = -2
+                            RestaurantId = -4
                         },
                         new
                         {
                             Id = -7,
                             Name = "McCrispy",
                             Price = 10m,
-                            RestaurantId = -3
+                            RestaurantId = -5
                         },
                         new
                         {
                             Id = -8,
                             Name = "McNuggets",
                             Price = 8m,
-                            RestaurantId = -3
+                            RestaurantId = -5
                         },
                         new
                         {
                             Id = -9,
                             Name = "Hamburger",
                             Price = 8m,
-                            RestaurantId = -3
-                        });
-                });
-
-            modelBuilder.Entity("QuickBite.Entities.Restaurant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Restaurants");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = -1,
-                            Address = "Sofia, zh.k. Lyulin 6, bul. Pancho Vladigerov 6",
-                            Name = "Domino's Pizza"
-                        },
-                        new
-                        {
-                            Id = -2,
-                            Address = "Sofia, zh.k. Lyulin 8, bul. Tsaritsa Yoanna 72",
-                            Name = "KFC"
-                        },
-                        new
-                        {
-                            Id = -3,
-                            Address = "Sofia, zh.k. Lulin 10, bul. Evropa 1",
-                            Name = "McDonald's"
+                            RestaurantId = -5
                         });
                 });
 
@@ -228,25 +187,15 @@ namespace QuickBite.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("UserType")
                         .HasColumnType("int");
 
                     b.Property<string>("Username")
@@ -257,45 +206,148 @@ namespace QuickBite.Migrations
 
                     b.ToTable("Users");
 
+                    b.HasDiscriminator<int>("UserType").HasValue(0);
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("QuickBite.Entities.Administrator", b =>
+                {
+                    b.HasBaseType("QuickBite.Entities.User");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("Surname")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Surname");
+
+                    b.HasDiscriminator().HasValue(9999);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -6,
+                            Email = "ivanivanov@gmail.com",
+                            Password = "pass123",
+                            Username = "ivanov123",
+                            Name = "Ivan",
+                            Surname = "Ivanov"
+                        });
+                });
+
+            modelBuilder.Entity("QuickBite.Entities.Courier", b =>
+                {
+                    b.HasBaseType("QuickBite.Entities.User");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("Surname")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Surname");
+
+                    b.HasDiscriminator().HasValue(2);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -2,
+                            Email = "petar444@gmail.com",
+                            Password = "pass123",
+                            Username = "petar444",
+                            Name = "Petar",
+                            Surname = "Petrov"
+                        });
+                });
+
+            modelBuilder.Entity("QuickBite.Entities.Customer", b =>
+                {
+                    b.HasBaseType("QuickBite.Entities.User");
+
+                    b.Property<string>("Address")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Address");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("Surname")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Surname");
+
+                    b.HasDiscriminator().HasValue(1);
+
                     b.HasData(
                         new
                         {
                             Id = -1,
                             Email = "valentinkoruev@gmail.com",
-                            FirstName = "Valentin",
-                            LastName = "Koruev",
                             Password = "pass123",
-                            Type = 1,
-                            Username = "valentinkoruev5"
-                        },
-                        new
-                        {
-                            Id = -2,
-                            Email = "petar444@gmail.com",
-                            FirstName = "Petar",
-                            LastName = "Petrov",
-                            Password = "pass123",
-                            Type = 2,
-                            Username = "petar444"
-                        },
+                            Username = "valentinkoruev5",
+                            Name = "Valentin",
+                            Surname = "Koruev"
+                        });
+                });
+
+            modelBuilder.Entity("QuickBite.Entities.Restaurant", b =>
+                {
+                    b.HasBaseType("QuickBite.Entities.User");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Address");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Name");
+
+                    b.HasDiscriminator().HasValue(3);
+
+                    b.HasData(
                         new
                         {
                             Id = -3,
-                            Email = "takeout@kfc.bg",
-                            FirstName = "KFC",
+                            Email = "takeout@dominos.bg",
                             Password = "pass123",
-                            Type = 3,
-                            Username = "kfc"
+                            Username = "dominos",
+                            Address = "Sofia, zh.k. Lyulin 6, bul. Pancho Vladigerov 6",
+                            Name = "Domino's Pizza"
                         },
                         new
                         {
                             Id = -4,
-                            Email = "ivanivanov@gmail.com",
-                            FirstName = "Ivan",
-                            LastName = "Ivanov",
+                            Email = "takeout@kfc.bg",
                             Password = "pass123",
-                            Type = 9999,
-                            Username = "ivanov123"
+                            Username = "kfc",
+                            Address = "Sofia, zh.k. Lyulin 8, Tsaritsa Yonna 72",
+                            Name = "KFC"
+                        },
+                        new
+                        {
+                            Id = -5,
+                            Email = "takeout@mcdonalds.bg",
+                            Password = "pass123",
+                            Username = "mcdonalds",
+                            Address = "Sofia, zh.k. Lyulin 10, bul. Evropa 1",
+                            Name = "McDonald's"
                         });
                 });
 

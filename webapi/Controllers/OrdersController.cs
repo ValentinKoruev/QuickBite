@@ -27,20 +27,20 @@ public class OrdersController : ControllerBase
         if (loggedUser == null) return Unauthorized();
 
         List<Order> res = [];
-        switch(loggedUser.Type) {
-            case UserType.Customer: {
+        switch(loggedUser) {
+            case Customer: {
                 res = context.Orders.Where(o => o.UserId == loggedUserId).ToList();
                 break;
             }
-            case UserType.Courier: {
+            case Courier: {
                 res = context.Orders.Where(o => o.CourierId == loggedUserId).ToList();
                 break;
             }
-            case UserType.Restaurant: {
+            case Restaurant: {
                 res = context.Orders.Where(o => o.RestaurantId == loggedUserId).ToList();
                 break;
             }
-            case UserType.Administrator: {
+            case Administrator: {
                 res = context.Orders.ToList();
                 break;
             }
@@ -71,10 +71,10 @@ public class OrdersController : ControllerBase
 
         if(res == null) return NotFound();
 
-        switch(loggedUser.Type) {
-            case UserType.Customer: if(res.UserId != loggedUserId) return Forbid(); break;
-            case UserType.Courier: if(res.CourierId != loggedUserId) return Forbid(); break;
-            case UserType.Restaurant: if(res.RestaurantId != loggedUserId) return Forbid(); break;
+        switch(loggedUser) {
+            case Customer: if(res.UserId != loggedUserId) return Forbid(); break;
+            case Courier: if(res.CourierId != loggedUserId) return Forbid(); break;
+            case Restaurant: if(res.RestaurantId != loggedUserId) return Forbid(); break;
         }
         context.Dispose();
 
@@ -95,7 +95,7 @@ public class OrdersController : ControllerBase
 
         if (loggedUser == null) return Unauthorized();
 
-        if (loggedUser.Type == UserType.Customer || loggedUser.Type == UserType.Administrator) return Forbid();
+        if (loggedUser is not Customer && loggedUser is not Administrator) return Forbid();
 
         Restaurant restaurant = context.Restaurants
                                   .Where(r => r.Id == model.RestaurantId)
@@ -156,7 +156,7 @@ public class OrdersController : ControllerBase
         if (order == null) return BadRequest();
 
         // administrator have full control over orders
-        if(loggedUser.Type == UserType.Administrator) {
+        if(loggedUser is Administrator) {
             order.Status = model.Status;
             context.Orders.Update(order);
             context.SaveChanges();
@@ -177,7 +177,7 @@ public class OrdersController : ControllerBase
         switch(model.Status) {
             // handled by courier
             case OrderStatus.Confirmed: {
-                if(loggedUser.Type != UserType.Courier) 
+                if(loggedUser is not Courier) 
                     return Forbid(); 
 
                 order.CourierId = loggedUser.Id;
@@ -186,23 +186,23 @@ public class OrdersController : ControllerBase
             }
             case OrderStatus.OutForDelivery:
             case OrderStatus.Delivered:
-                if(loggedUser.Type != UserType.Courier || order.CourierId != loggedUserId) return Forbid(); break;
+                if(loggedUser is not Courier || order.CourierId != loggedUserId) return Forbid(); break;
             
             // handled by restaurant
             case OrderStatus.Preparing:
             case OrderStatus.ReadyForPickup:
-                if(loggedUser.Type != UserType.Restaurant || order.RestaurantId != loggedUserId) return Forbid(); break;
+                if(loggedUser is not Restaurant || order.RestaurantId != loggedUserId) return Forbid(); break;
 
             // handled by customer
             case OrderStatus.Canceled:
-                if(loggedUser.Type != UserType.Customer || order.UserId != loggedUserId) return Forbid(); break;
+                if(loggedUser is not Customer || order.UserId != loggedUserId) return Forbid(); break;
             
             // handled both by courier and restaurant
             case OrderStatus.Failed:
-                if(!(loggedUser.Type == UserType.Courier && order.CourierId == loggedUserId))  
+                if(loggedUser is not Courier || order.CourierId != loggedUserId)  
                     return Forbid();
 
-                if(!(loggedUser.Type == UserType.Restaurant && order.RestaurantId == loggedUserId))  
+                if(!(loggedUser is not Restaurant || order.RestaurantId != loggedUserId))  
                     return Forbid();
                 
                 break;
@@ -223,33 +223,33 @@ public class OrdersController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
-        QuickBiteDbContext context = new QuickBiteDbContext();
+        // QuickBiteDbContext context = new QuickBiteDbContext();
 
-        int loggedUserId = -3;
+        // int loggedUserId = -3;
         
-        User loggedUser = context.Users
-                                  .Where(u => u.Id == loggedUserId)
-                                  .FirstOrDefault();
+        // User loggedUser = context.Users
+        //                           .Where(u => u.Id == loggedUserId)
+        //                           .FirstOrDefault();
 
-        if (loggedUser == null) return Unauthorized();
+        // if (loggedUser == null) return Unauthorized();
 
-        if (loggedUser.Type != UserType.Administrator) return Forbid();
+        // if (loggedUser != Administrator) return Forbid();
 
-        Order order = context.Orders
-                            .Where(i => i.Id == id)
-                            .FirstOrDefault();
+        // Order order = context.Orders
+        //                     .Where(i => i.Id == id)
+        //                     .FirstOrDefault();
 
-        if (order != null)
-        {
-            context.Orders.Remove(order);
-            context.SaveChanges();
+        // if (order != null)
+        // {
+        //     context.Orders.Remove(order);
+        //     context.SaveChanges();
 
-            context.Dispose();
+        //     context.Dispose();
 
-            return Ok(order);
-        }
+        //     return Ok(order);
+        // }
 
-        context.Dispose();
+        // context.Dispose();
 
         return NotFound();
     }

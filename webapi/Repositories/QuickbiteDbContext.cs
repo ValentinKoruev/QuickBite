@@ -11,10 +11,14 @@ public class QuickBiteDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Restaurant> Restaurants { get; set; }
+    public DbSet<Customer> Customers { get; set; }
+    public DbSet<Courier> Couriers { get; set; }
+    public DbSet<Administrator> Administrators { get; set; }
     public DbSet<Product> Products{ get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderProduct> OrderProducts { get; set; }
 
+    private int userIndex = -1;
     public QuickBiteDbContext()
     { }
 
@@ -27,82 +31,99 @@ public class QuickBiteDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().HasData(GetUsers());
+        modelBuilder.Entity<User>()
+                .HasDiscriminator<int>("UserType")
+                .HasValue<User>(0)
+                .HasValue<Customer>(1)
+                .HasValue<Courier>(2)
+                .HasValue<Restaurant>(3)
+                .HasValue<Administrator>(9999);
+        
+        modelBuilder.Entity<Customer>().Property(x => x.Name).HasColumnName("Name");
+        modelBuilder.Entity<Customer>().Property(x => x.Surname).HasColumnName("Surname");
+        modelBuilder.Entity<Customer>().Property(x => x.Address).HasColumnName("Address");
+
+        modelBuilder.Entity<Courier>().Property(x=> x.Name).HasColumnName("Name");
+        modelBuilder.Entity<Courier>().Property(x=> x.Surname).HasColumnName("Surname");
+
+        modelBuilder.Entity<Restaurant>().Property(x=> x.Name).HasColumnName("Name");
+        modelBuilder.Entity<Restaurant>().Property(x=> x.Address).HasColumnName("Address");
+
+        modelBuilder.Entity<Administrator>().Property(x=> x.Name).HasColumnName("Name");
+        modelBuilder.Entity<Administrator>().Property(x=> x.Surname).HasColumnName("Surname");
+        
+        modelBuilder.Entity<Customer>().HasData(GetCustomers());
+        modelBuilder.Entity<Courier>().HasData(GetCouriers());
         modelBuilder.Entity<Restaurant>().HasData(GetRestaurants());
+        modelBuilder.Entity<Administrator>().HasData(GetAdministrators());
         modelBuilder.Entity<Product>().HasData(GetProducts());
     }
-
-    private IEnumerable<User> GetUsers() {
-        int index = -1;
-        User[] users =
-        [
-            new User() {
-                Id = index--,
+    private IEnumerable<Customer> GetCustomers() {
+        return [
+            new Customer() {
+                Id = -1,
                 Username = "valentinkoruev5",
                 Password = "pass123",
                 Email = "valentinkoruev@gmail.com",
-                FirstName = "Valentin",
-                LastName = "Koruev",
-                Type = User.UserType.Customer
-            },
-            new User() {
-                Id = index--,
+                Name = "Valentin",
+                Surname = "Koruev"
+        }];
+    }
+    private IEnumerable<Courier> GetCouriers() {
+        return [
+            new Courier() {
+                Id = -2,
                 Username = "petar444",
                 Password = "pass123",
                 Email = "petar444@gmail.com",
-                FirstName = "Petar",
-                LastName = "Petrov",
-                Type = User.UserType.Courier
-            },
-            new User() {
-                Id = index--,
-                Username = "kfc",
-                Password = "pass123",
-                Email = "takeout@kfc.bg",
-                FirstName = "KFC",
-                Type = User.UserType.Restaurant
-            },
-            new User() {
-                Id = index--,
-                Username = "ivanov123",
-                Password = "pass123",
-                Email = "ivanivanov@gmail.com",
-                FirstName = "Ivan",
-                LastName = "Ivanov",
-                Type = User.UserType.Administrator
-            },
-        ];
-
-        return users;
+                Name = "Petar",
+                Surname = "Petrov"
+        }];
     }
-    private IEnumerable<Restaurant> GetRestaurants() 
-    {
-        int index = -1;
-        Restaurant[] restaurants = [
+    private enum RestaurantDummyIds {
+        Dominos = -3,
+        KFC = -4,
+        McDonalds = -5,
+    }
+    private IEnumerable<Restaurant> GetRestaurants() {
+        return [
             new Restaurant() {
-                Id = index--,
+                Id = -3,
+                Username = "dominos",
+                Password = "pass123",
+                Email = "takeout@dominos.bg",
                 Name = "Domino's Pizza",
                 Address = "Sofia, zh.k. Lyulin 6, bul. Pancho Vladigerov 6"
             },
             new Restaurant() {
-                Id = index--,
-                Name = "KFC",
-                Address = "Sofia, zh.k. Lyulin 8, bul. Tsaritsa Yoanna 72"
+                Id = -4,
+                Username = "kfc",
+                Password = "pass123",
+                Email = "takeout@kfc.bg",
+                Address = "Sofia, zh.k. Lyulin 8, Tsaritsa Yonna 72",
+                Name = "KFC"
             },
             new Restaurant() {
-                Id = index--,
+                Id = -5,
+                Username = "mcdonalds",
+                Password = "pass123",
+                Email = "takeout@mcdonalds.bg",
                 Name = "McDonald's",
-                Address = "Sofia, zh.k. Lulin 10, bul. Evropa 1"
+                Address = "Sofia, zh.k. Lyulin 10, bul. Evropa 1"
+            },
+        ];
+    }
+    private IEnumerable<Administrator> GetAdministrators() {
+        return [
+            new Administrator() {
+                Id = -6,
+                Username = "ivanov123",
+                Password = "pass123",
+                Email = "ivanivanov@gmail.com",
+                Name = "Ivan",
+                Surname = "Ivanov",
             }
         ];
-
-        return restaurants;
-    }
-
-    private enum RestaurantDummyIds {
-        Dominos = -1,
-        KFC = -2,
-        McDonalds = -3,
     }
     private IEnumerable<Product> GetProducts() {
         int index = -1;
