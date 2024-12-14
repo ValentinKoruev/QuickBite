@@ -21,7 +21,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidIssuer = "quickbite",
         ValidAudience = "quickbite-api",
         IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.ASCII.GetBytes("!Password123!Password123!Password123"))
+        Encoding.ASCII.GetBytes("!Password123!Password123!Password123!Password123"))
       };
   });
 

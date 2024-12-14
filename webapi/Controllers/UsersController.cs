@@ -16,7 +16,12 @@ namespace QuickBite.Controllers
         public IActionResult Get()
         {
             QuickBiteDbContext context = new QuickBiteDbContext();
-            int loggedUserId = -1;
+            
+            var userCred = User.FindFirst("LoggedUserId");
+
+            if(userCred is null) return Unauthorized();
+            
+            int loggedUserId = Convert.ToInt32(userCred.Value);
         
             User loggedUser = context.Users
                 .Where(u => u.Id == loggedUserId)
@@ -41,6 +46,8 @@ namespace QuickBite.Controllers
             User user = context.Users
             .Where(i => i.Id == id)
             .FirstOrDefault();
+
+            if(user is null) return NotFound();
 
             context.Dispose();
 
@@ -132,7 +139,11 @@ namespace QuickBite.Controllers
         {
             QuickBiteDbContext context = new QuickBiteDbContext();
 
-            int loggedUserId = -6;
+            var userCred = User.FindFirst("LoggedUserId");
+
+            if(userCred is null) return Unauthorized();
+            
+            int loggedUserId = Convert.ToInt32(userCred.Value);
         
             var loggedUser = context.Set<User>().Find(loggedUserId);
 

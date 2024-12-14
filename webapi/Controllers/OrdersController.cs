@@ -18,11 +18,15 @@ public class OrdersController : ControllerBase
     {
         QuickBiteDbContext context = new QuickBiteDbContext();
 
-        int loggedUserId = -1;
+        var userCred = User.FindFirst("LoggedUserId");
+
+        if(userCred is null) return Unauthorized();
         
+        int loggedUserId = Convert.ToInt32(userCred.Value);
+
         User loggedUser = context.Users
-                                  .Where(u => u.Id == loggedUserId)
-                                  .FirstOrDefault();
+        .Where(u => u.Id == loggedUserId)
+        .FirstOrDefault();
 
         if (loggedUser == null) return Unauthorized();
 
@@ -57,11 +61,15 @@ public class OrdersController : ControllerBase
     {
         QuickBiteDbContext context = new QuickBiteDbContext();
 
-        int loggedUserId = -1;
+        var userCred = User.FindFirst("LoggedUserId");
+
+        if(userCred is null) return Unauthorized();
+        
+        int loggedUserId = Convert.ToInt32(userCred.Value);
 
         User loggedUser = context.Users
-                                  .Where(u => u.Id == loggedUserId)
-                                  .FirstOrDefault();
+        .Where(u => u.Id == loggedUserId)
+        .FirstOrDefault();
 
         if (loggedUser == null) return Unauthorized();
 
@@ -86,26 +94,29 @@ public class OrdersController : ControllerBase
     {
         QuickBiteDbContext context = new QuickBiteDbContext();
 
-        // int loggedUserId = Convert.ToInt32(this.User.FindFirst("loggedUserId").Value);
-        int loggedUserId = -1;
+        var userCred = User.FindFirst("LoggedUserId");
+
+        if(userCred is null) return Unauthorized();
+        
+        int loggedUserId = Convert.ToInt32(userCred.Value);
         
         User loggedUser = context.Users
-                                  .Where(u => u.Id == loggedUserId)
-                                  .FirstOrDefault();
+        .Where(u => u.Id == loggedUserId)
+        .FirstOrDefault();
 
         if (loggedUser == null) return Unauthorized();
 
         if (loggedUser is not Customer && loggedUser is not Administrator) return Forbid();
 
         Restaurant restaurant = context.Restaurants
-                                  .Where(r => r.Id == model.RestaurantId)
-                                  .FirstOrDefault();
+        .Where(r => r.Id == model.RestaurantId)
+        .FirstOrDefault();
 
         if (restaurant == null) return BadRequest();           
 
         Order order = new Order {
             UserId = loggedUserId,
-            RestaurantId = context.Restaurants.First().Id,
+            RestaurantId = model.RestaurantId,
             Address = model.Address,
             Status = OrderStatus.Pending
         };
@@ -133,7 +144,7 @@ public class OrdersController : ControllerBase
 
         context.Dispose();
 
-        return Ok();
+        return Ok(order);
     }
 
     [HttpPut]
@@ -141,11 +152,16 @@ public class OrdersController : ControllerBase
     {
         QuickBiteDbContext context = new QuickBiteDbContext();
 
-        int loggedUserId = -2;
+        
+        var userCred = User.FindFirst("LoggedUserId");
+
+        if(userCred is null) return Unauthorized();
+        
+        int loggedUserId = Convert.ToInt32(userCred.Value);
         
         User loggedUser = context.Users
-                                  .Where(u => u.Id == loggedUserId)
-                                  .FirstOrDefault();
+        .Where(u => u.Id == loggedUserId)
+        .FirstOrDefault();
 
         if (loggedUser == null) return Unauthorized();
 
@@ -223,33 +239,33 @@ public class OrdersController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
-        // QuickBiteDbContext context = new QuickBiteDbContext();
+        QuickBiteDbContext context = new QuickBiteDbContext();
 
-        // int loggedUserId = -3;
+        int loggedUserId = -3;
         
-        // User loggedUser = context.Users
-        //                           .Where(u => u.Id == loggedUserId)
-        //                           .FirstOrDefault();
+        User loggedUser = context.Users
+        .Where(u => u.Id == loggedUserId)
+        .FirstOrDefault();
 
-        // if (loggedUser == null) return Unauthorized();
+        if (loggedUser == null) return Unauthorized();
 
-        // if (loggedUser != Administrator) return Forbid();
+        if (loggedUser is not Administrator) return Forbid();
 
-        // Order order = context.Orders
-        //                     .Where(i => i.Id == id)
-        //                     .FirstOrDefault();
+        Order order = context.Orders
+        .Where(i => i.Id == id)
+        .FirstOrDefault();
 
-        // if (order != null)
-        // {
-        //     context.Orders.Remove(order);
-        //     context.SaveChanges();
+        if (order != null)
+        {
+            context.Orders.Remove(order);
+            context.SaveChanges();
 
-        //     context.Dispose();
+            context.Dispose();
 
-        //     return Ok(order);
-        // }
+            return Ok(order);
+        }
 
-        // context.Dispose();
+        context.Dispose();
 
         return NotFound();
     }

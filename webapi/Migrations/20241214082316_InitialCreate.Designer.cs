@@ -12,7 +12,7 @@ using QuickBite.Repositories;
 namespace QuickBite.Migrations
 {
     [DbContext(typeof(QuickBiteDbContext))]
-    [Migration("20241213220416_InitialCreate")]
+    [Migration("20241214082316_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -177,6 +177,31 @@ namespace QuickBite.Migrations
                             Price = 8m,
                             RestaurantId = -5
                         });
+                });
+
+            modelBuilder.Entity("QuickBite.Entities.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("QuickBite.Entities.User", b =>
@@ -404,6 +429,17 @@ namespace QuickBite.Migrations
                         .IsRequired();
 
                     b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("QuickBite.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("QuickBite.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
