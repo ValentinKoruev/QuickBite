@@ -49,11 +49,19 @@ public class OrdersController : ControllerBase
                 break;
             }
         }
-        
+
+        List<GetModel> getModels = new List<GetModel>();
+        foreach(var order in res) {
+            Product[] orderProducts = context.OrderProducts.Where(op => op.OrderId == order.Id).Select(op => op.Product).ToArray();
+            getModels.Add(new GetModel() {
+                Order = order,
+                Products = orderProducts
+            });
+        }
 
         context.Dispose();
 
-        return Ok(res);
+        return Ok(getModels);
     }
 
     [HttpGet("{id}")]
@@ -64,7 +72,7 @@ public class OrdersController : ControllerBase
         var userCred = User.FindFirst("LoggedUserId");
 
         if(userCred is null) return Unauthorized();
-        
+         
         int loggedUserId = Convert.ToInt32(userCred.Value);
 
         User loggedUser = context.Users
@@ -73,20 +81,26 @@ public class OrdersController : ControllerBase
 
         if (loggedUser == null) return Unauthorized();
 
-        Order res = null;
+        Order order = null;
 
-        res = context.Orders.Where(o => o.Id == id).FirstOrDefault();
+        order = context.Orders.Where(o => o.Id == id).FirstOrDefault();
 
-        if(res == null) return NotFound();
+        if(order == null) return NotFound();
 
         switch(loggedUser) {
-            case Customer: if(res.UserId != loggedUserId) return Forbid(); break;
-            case Courier: if(res.CourierId != loggedUserId) return Forbid(); break;
-            case Restaurant: if(res.RestaurantId != loggedUserId) return Forbid(); break;
+            case Customer: if(order.UserId != loggedUserId) return Forbid(); break;
+            case Courier: if(order.CourierId != loggedUserId) return Forbid(); break;
+            case Restaurant: if(order.RestaurantId != loggedUserId) return Forbid(); break;
         }
-        context.Dispose();
 
-        return Ok(res);
+        Product[] orderProducts = context.OrderProducts.Where(op => op.OrderId == order.Id).Select(op => op.Product).ToArray();
+
+        context.Dispose();
+        
+        return Ok(new GetModel {
+            Order = order,
+            Products = orderProducts
+        });
     }
 
     [HttpPost]
@@ -128,8 +142,8 @@ public class OrdersController : ControllerBase
         foreach(CreateModel.ProductModel productModel in model.Products) {
 
             Product product = context.Products
-                                  .Where(p => p.Id == productModel.Id)
-                                  .FirstOrDefault();
+            .Where(p => p.Id == productModel.Id)
+            .FirstOrDefault();
 
             if(product == null) continue; // skip not found items
 
